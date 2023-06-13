@@ -12,7 +12,7 @@ variable "project" {
 variable "region" {
   description = "Region to create ILB in."
   type        = string
-  default     = null
+  default     = ""
 }
 
 variable "health_check_port" {
