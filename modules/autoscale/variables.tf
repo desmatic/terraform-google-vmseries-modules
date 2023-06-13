@@ -3,6 +3,12 @@ variable "prefix" {
   type        = string
 }
 
+variable "project" {
+  description = "The project to deploy to. If unset the default provider project is used."
+  type        = string
+  default     = null
+}
+
 variable "region" {
   description = "The Google Cloud region for the resources.  If null is provided, provider region will be used."
   default     = null

@@ -5,6 +5,8 @@ resource "google_compute_instance_template" "this" {
   can_ip_forward   = true
   tags             = var.tags
   metadata         = var.metadata
+  project          = var.project
+  region           = var.region
 
   service_account {
     scopes = var.scopes
@@ -44,6 +46,7 @@ resource "google_compute_instance_group_manager" "this" {
   name               = "${var.prefix}-igm-${each.value}"
   zone               = each.value
   target_pools       = compact([var.pool])
+  project            = var.project
 
   version {
     instance_template = google_compute_instance_template.this.id
@@ -89,6 +92,7 @@ resource "google_compute_autoscaler" "this" {
   name     = "${var.prefix}-${random_id.autoscaler[each.key].hex}-as-${each.value}"
   target   = try(google_compute_instance_group_manager.this[each.key].id, "")
   zone     = each.value
+  project  = var.project
 
   autoscaling_policy {
     max_replicas    = var.max_replicas_per_zone
@@ -121,17 +125,22 @@ resource "google_compute_autoscaler" "this" {
 
 resource "google_pubsub_topic" "this" {
   name = "${var.deployment_name}-panorama-apps-deployment"
+  project = var.project
 }
 
 resource "google_pubsub_subscription" "this" {
   name  = "${var.deployment_name}-panorama-plugin-subscription"
   topic = google_pubsub_topic.this.id
+  project = var.project
 }
 
 resource "google_pubsub_subscription_iam_member" "this" {
   subscription = google_pubsub_subscription.this.id
   role         = "roles/pubsub.subscriber"
   member       = "serviceAccount:${coalesce(var.service_account_email, data.google_compute_default_service_account.this.email)}"
+  project      = var.project
 }
 
-data "google_compute_default_service_account" "this" {}
+data "google_compute_default_service_account" "this" {
+  project = var.project
+}

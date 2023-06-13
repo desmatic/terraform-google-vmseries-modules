@@ -2,7 +2,10 @@ locals {
   prefix = var.prefix != null && var.prefix != "" ? "${var.prefix}-" : ""
 }
 
-data "google_compute_zones" "main" {}
+data "google_compute_zones" "main" {
+  project = var.project_id
+  region = var.region    
+}
 
 
 #-----------------------------------------------------------------------------------------------
@@ -133,6 +136,8 @@ module "autoscale" {
     zone2 = data.google_compute_zones.main.names[1]
   }
 
+  project               = var.project_id
+  region                = var.region
   prefix                = "${local.prefix}vmseries-mig"
   deployment_name       = "${local.prefix}vmseries-mig-deployment"
   machine_type          = var.vmseries_machine_type
@@ -204,6 +209,8 @@ module "intlb" {
   source = "../../modules/lb_internal/"
 
   name                = "${local.prefix}intlb"
+  project             = var.project_id
+  region              = var.region
   network             = module.vpc_trust.network_id
   subnetwork          = module.vpc_trust.subnets_self_links[0]
   all_ports           = true
@@ -219,6 +226,8 @@ module "extlb" {
   source = "../../modules/lb_external/"
 
   name  = "${local.prefix}extlb"
+  project = var.project_id
+  region = var.region
   rules = { ("${local.prefix}rule0") = { port_range = 80 } }
 
   health_check_http_port         = 80

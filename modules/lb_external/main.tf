@@ -18,7 +18,7 @@ resource "google_compute_address" "this" {
 
   name         = each.key
   address_type = "EXTERNAL"
-  region       = var.region
+  region       = local.region
   project      = var.project
 }
 
@@ -58,7 +58,7 @@ resource "google_compute_target_pool" "this" {
   session_affinity = var.session_affinity
   instances        = var.instances
   health_checks    = var.create_health_check ? [google_compute_http_health_check.this[0].self_link] : []
-  region           = var.region
+  region           = local.region
   project          = var.project
 
   lifecycle {

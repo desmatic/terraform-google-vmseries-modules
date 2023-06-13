@@ -1,7 +1,11 @@
-data "google_client_config" "this" {}
+data "google_client_config" "this" {
+  project = var.project
+  region = var.region
+}
 
 resource "google_compute_health_check" "this" {
   name = "${var.name}-${data.google_client_config.this.region}-check-tcp${var.health_check_port}"
+  project = var.project
 
   tcp_health_check {
     port = var.health_check_port
@@ -10,6 +14,7 @@ resource "google_compute_health_check" "this" {
 
 resource "google_compute_region_backend_service" "this" {
   name   = var.name
+  project = var.project
   region = var.region
 
   health_checks                   = [var.health_check != null ? var.health_check : google_compute_health_check.this.self_link]
@@ -47,6 +52,7 @@ resource "google_compute_region_backend_service" "this" {
 
 resource "google_compute_forwarding_rule" "this" {
   name   = var.name
+  project = var.project
   region = var.region
 
   load_balancing_scheme = "INTERNAL"
